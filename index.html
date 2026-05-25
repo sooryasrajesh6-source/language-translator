@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Language Translator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #6a11cb, #2575fc);
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 850px;
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 30px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      text-align: center;
+      color: #222;
+      margin-bottom: 25px;
+    }
+
+    .language-row {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    select {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .text-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    textarea {
+      width: 100%;
+      height: 220px;
+      padding: 15px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      resize: none;
+      font-size: 16px;
+      outline: none;
+    }
+
+    textarea:focus,
+    select:focus {
+      border-color: #2575fc;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 25px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      background: #2575fc;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #155ed1;
+    }
+
+    .clear-btn {
+      background: #444;
+    }
+
+    .clear-btn:hover {
+      background: #222;
+    }
+
+    .note {
+      text-align: center;
+      margin-top: 18px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    @media (max-width: 700px) {
+      .language-row,
+      .text-row {
+        grid-template-columns: 1fr;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Language Translator</h1>
+
+    <div class="language-row">
+      <select id="fromLanguage">
+        <option value="en">English</option>
+        <option value="hi">Hindi</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="de">German</option>
+        <option value="ar">Arabic</option>
+        <option value="ja">Japanese</option>
+        <option value="ko">Korean</option>
+        <option value="ml">Malayalam</option>
+        <option value="ta">Tamil</option>
+      </select>
+
+      <select id="toLanguage">
+        <option value="hi">Hindi</option>
+        <option value="en">English</option>
+        <option value="es">Spanish</option>
+        <option value="fr">French</option>
+        <option value="de">German</option>
+        <option value="ar">Arabic</option>
+        <option value="ja">Japanese</option>
+        <option value="ko">Korean</option>
+        <option value="ml">Malayalam</option>
+        <option value="ta">Tamil</option>
+      </select>
+    </div>
+
+    <div class="text-row">
+      <textarea id="inputText" placeholder="Enter text here..."></textarea>
+      <textarea id="outputText" placeholder="Translation will appear here..." readonly></textarea>
+    </div>
+
+    <div class="buttons">
+      <button onclick="translateText()">Translate</button>
+      <button onclick="swapLanguages()">Swap</button>
+      <button class="clear-btn" onclick="clearText()">Clear</button>
+    </div>
+
+    <p class="note">Uses the free MyMemory Translation API.</p>
+  </div>
+
+  <script>
+    async function translateText() {
+      const inputText = document.getElementById("inputText").value.trim();
+      const outputText = document.getElementById("outputText");
+      const fromLanguage = document.getElementById("fromLanguage").value;
+      const toLanguage = document.getElementById("toLanguage").value;
+
+      if (inputText === "") {
+        outputText.value = "Please enter text to translate.";
+        return;
+      }
+
+      outputText.value = "Translating...";
+
+      try {
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(inputText)}&langpair=${fromLanguage}|${toLanguage}`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        if (data.responseData && data.responseData.translatedText) {
+          outputText.value = data.responseData.translatedText;
+        } else {
+          outputText.value = "Translation failed. Try again.";
+        }
+      } catch (error) {
+        outputText.value = "Error connecting to translation service.";
+      }
+    }
+
+    function clearText() {
+      document.getElementById("inputText").value = "";
+      document.getElementById("outputText").value = "";
+    }
+
+    function swapLanguages() {
+      const fromLanguage = document.getElementById("fromLanguage");
+      const toLanguage = document.getElementById("toLanguage");
+      const inputText = document.getElementById("inputText");
+      const outputText = document.getElementById("outputText");
+
+      const tempLang = fromLanguage.value;
+      fromLanguage.value = toLanguage.value;
+      toLanguage.value = tempLang;
+
+      const tempText = inputText.value;
+      inputText.value = outputText.value;
+      outputText.value = tempText;
+    }
+  </script>
+</body>
+</html>
